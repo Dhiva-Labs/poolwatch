@@ -1,0 +1,24 @@
+[package]
+name = "poolwatch-adapters"
+description = "Concrete RPC adapters: cryptonote (monerod/oxend/beldexd) and bitcoind families"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+poolwatch-core = { path = "../poolwatch-core" }
+async-trait = "0.1"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "json"] }
+tokio = { version = "1", features = ["rt", "macros", "time", "fs"] }
+tracing = "0.1"
+md-5 = "0.11"
+hex = "0.4"
+rand = "0.10"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

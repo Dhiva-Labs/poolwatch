@@ -1,0 +1,12 @@
+[package]
+name = "poolwatch-core"
+description = "Chain-agnostic mempool domain model, adapter trait, tracking and stats"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+async-trait = "0.1"
+thiserror = "2"
