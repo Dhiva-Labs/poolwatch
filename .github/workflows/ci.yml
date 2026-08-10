@@ -40,8 +40,11 @@ jobs:
         run: cargo build --release --target x86_64-unknown-linux-musl
       - name: verify static
         run: |
-          file target/x86_64-unknown-linux-musl/release/poolwatch
-          ldd target/x86_64-unknown-linux-musl/release/poolwatch 2>&1 | grep -q "not a dynamic executable" || { echo "binary is not static"; exit 1; }
+          BIN=target/x86_64-unknown-linux-musl/release/poolwatch
+          file "$BIN"
+          # ldd wording differs by binary flavor: "not a dynamic executable"
+          # (static) vs "statically linked" (static-pie).
+          ldd "$BIN" 2>&1 | grep -qE "statically linked|not a dynamic executable" || { echo "binary is not static"; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: poolwatch-x86_64-linux-musl

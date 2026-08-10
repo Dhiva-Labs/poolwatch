@@ -25,7 +25,9 @@ jobs:
       - name: package
         run: |
           BIN=target/x86_64-unknown-linux-musl/release/poolwatch
-          ldd "$BIN" 2>&1 | grep -q "not a dynamic executable" || { echo "binary is not static"; exit 1; }
+          # ldd wording differs by binary flavor: "not a dynamic executable"
+          # (static) vs "statically linked" (static-pie).
+          ldd "$BIN" 2>&1 | grep -qE "statically linked|not a dynamic executable" || { echo "binary is not static"; exit 1; }
           NAME=poolwatch-${GITHUB_REF_NAME}-x86_64-linux-musl
           mkdir "$NAME"
           cp "$BIN" LICENSE README.md poolwatch.example.toml "$NAME/"
