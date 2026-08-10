@@ -1,0 +1,62 @@
+{
+  "credits": 0,
+  "status": "OK",
+  "top_hash": "",
+  "transactions": [
+    {
+      "blob_size": 1526,
+      "do_not_relay": false,
+      "double_spend_seen": false,
+      "fee": 30520000000,
+      "id_hash": "4e91a2c74e91a2c74e91a2c74e91a2c74e91a2c74e91a2c74e91a2c74e91a2c7",
+      "kept_by_block": false,
+      "last_failed_height": 0,
+      "last_failed_id_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "last_relayed_time": 1786320008,
+      "max_used_block_height": 3733711,
+      "max_used_block_id_hash": "7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea",
+      "receive_time": 1786320005,
+      "relayed": true,
+      "tx_blob": "",
+      "tx_json": "{\n  \"version\": 2,\n  \"unlock_time\": 0,\n  \"vin\": [\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000000,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f\"\n      }\n    },\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000131,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f\"\n      }\n    }\n  ],\n  \"vout\": [\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18a\",\n          \"view_tag\": \"5b\"\n        }\n      }\n    },\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28a\",\n          \"view_tag\": \"5c\"\n        }\n      }\n    }\n  ],\n  \"extra\": [\n    1,\n    159,\n    44,\n    68,\n    209,\n    11,\n    118,\n    227,\n    88,\n    2,\n    9,\n    1,\n    58,\n    119,\n    194\n  ],\n  \"rct_signatures\": {\n    \"type\": 6,\n    \"txnFee\": 30520000000,\n    \"ecdhInfo\": [\n      {\n        \"amount\": \"119c4d119c4d119c\"\n      },\n      {\n        \"amount\": \"129c4d129c4d129c\"\n      }\n    ],\n    \"outPk\": [\n      \"71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e2\",\n      \"72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e2\"\n    ]\n  }\n}",
+      "weight": 1526
+    },
+    {
+      "blob_size": 2210,
+      "do_not_relay": false,
+      "double_spend_seen": true,
+      "fee": 55250000000,
+      "id_hash": "b70d3f18b70d3f18b70d3f18b70d3f18b70d3f18b70d3f18b70d3f18b70d3f18",
+      "kept_by_block": false,
+      "last_failed_height": 0,
+      "last_failed_id_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "last_relayed_time": 1786319893,
+      "max_used_block_height": 3733710,
+      "max_used_block_id_hash": "7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea",
+      "receive_time": 1786319890,
+      "relayed": true,
+      "tx_blob": "",
+      "tx_json": "{\n  \"version\": 2,\n  \"unlock_time\": 0,\n  \"vin\": [\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000000,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f\"\n      }\n    }\n  ],\n  \"vout\": [\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18a\",\n          \"view_tag\": \"5b\"\n        }\n      }\n    },\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28a\",\n          \"view_tag\": \"5c\"\n        }\n      }\n    }\n  ],\n  \"extra\": [\n    1,\n    159,\n    44,\n    68,\n    209,\n    11,\n    118,\n    227,\n    88,\n    2,\n    9,\n    1,\n    58,\n    119,\n    194\n  ],\n  \"rct_signatures\": {\n    \"type\": 6,\n    \"txnFee\": 55250000000,\n    \"ecdhInfo\": [\n      {\n        \"amount\": \"119c4d119c4d119c\"\n      },\n      {\n        \"amount\": \"129c4d129c4d129c\"\n      }\n    ],\n    \"outPk\": [\n      \"71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e2\",\n      \"72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e2\"\n    ]\n  }\n}",
+      "weight": 2210
+    },
+    {
+      "blob_size": 2857,
+      "do_not_relay": false,
+      "double_spend_seen": false,
+      "fee": 42855000000,
+      "id_hash": "1cf5e6a91cf5e6a91cf5e6a91cf5e6a91cf5e6a91cf5e6a91cf5e6a91cf5e6a9",
+      "kept_by_block": false,
+      "last_failed_height": 0,
+      "last_failed_id_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "last_relayed_time": 0,
+      "max_used_block_height": 3733707,
+      "max_used_block_id_hash": "7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea7b1c04ea",
+      "receive_time": 0,
+      "relayed": true,
+      "tx_blob": "",
+      "tx_json": "{\n  \"version\": 2,\n  \"unlock_time\": 0,\n  \"vin\": [\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000000,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f7c1b9ea03f\"\n      }\n    },\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000131,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f7c1b9ea13f\"\n      }\n    },\n    {\n      \"key\": {\n        \"amount\": 0,\n        \"key_offsets\": [\n          24000262,\n          38,\n          75,\n          112,\n          149,\n          186,\n          223,\n          260,\n          297,\n          334,\n          371,\n          408,\n          445,\n          482,\n          519,\n          556\n        ],\n        \"k_image\": \"a23f7c1b9ea23f7c1b9ea23f7c1b9ea23f7c1b9ea23f7c1b9ea23f7c1b9ea23f\"\n      }\n    }\n  ],\n  \"vout\": [\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18ad2e50fc18a\",\n          \"view_tag\": \"5b\"\n        }\n      }\n    },\n    {\n      \"amount\": 0,\n      \"target\": {\n        \"tagged_key\": {\n          \"key\": \"c28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28ad2e50fc28a\",\n          \"view_tag\": \"5c\"\n        }\n      }\n    }\n  ],\n  \"extra\": [\n    1,\n    159,\n    44,\n    68,\n    209,\n    11,\n    118,\n    227,\n    88,\n    2,\n    9,\n    1,\n    58,\n    119,\n    194\n  ],\n  \"rct_signatures\": {\n    \"type\": 6,\n    \"txnFee\": 42855000000,\n    \"ecdhInfo\": [\n      {\n        \"amount\": \"119c4d119c4d119c\"\n      },\n      {\n        \"amount\": \"129c4d129c4d129c\"\n      }\n    ],\n    \"outPk\": [\n      \"71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e26b71e2\",\n      \"72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e26b72e2\"\n    ]\n  }\n}",
+      "weight": 2857
+    }
+  ],
+  "untrusted": false
+}

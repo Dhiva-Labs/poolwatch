@@ -13,7 +13,12 @@ async-trait = "0.1"
 thiserror = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["raw_value"] }
-reqwest = { version = "0.13", default-features = false, features = ["rustls", "json"] }
+# `rustls-no-provider` instead of `rustls`: the latter pulls rustls' default
+# aws-lc-rs provider, which needs cmake + a C toolchain and breaks the static
+# musl release build. We install the pure-Rust `ring` provider ourselves in
+# rpc.rs instead.
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider", "json"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 tokio = { version = "1", features = ["rt", "macros", "time", "fs"] }
 tracing = "0.1"
 md-5 = "0.11"

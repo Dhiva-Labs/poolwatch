@@ -10,7 +10,8 @@
 
 pub mod bitcoind;
 pub mod cryptonote;
-pub(crate) mod rpc;
+pub mod rpc;
 
 pub use bitcoind::{BitcoindAdapter, BitcoindAuth, BitcoindConfig};
 pub use cryptonote::{CryptonoteAdapter, CryptonoteConfig};
+pub use rpc::{NodeInfo, ParsedPool};

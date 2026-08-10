@@ -1,0 +1,94 @@
+{
+  "result": {
+    "3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a": {
+      "vsize": 141,
+      "weight": 561,
+      "time": 1786319981,
+      "height": 962741,
+      "descendantcount": 2,
+      "descendantsize": 349,
+      "ancestorcount": 1,
+      "ancestorsize": 141,
+      "wtxid": "a71e5c0da71e5c0da71e5c0da71e5c0da71e5c0da71e5c0da71e5c0da71e5c0d",
+      "fees": {
+        "base": 0.00001410,
+        "modified": 0.00001410,
+        "ancestor": 0.00001410,
+        "descendant": 0.00001826
+      },
+      "depends": [],
+      "spentby": [
+        "05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f"
+      ],
+      "bip125-replaceable": true,
+      "unbroadcast": false
+    },
+    "8d51e9408d51e9408d51e9408d51e9408d51e9408d51e9408d51e9408d51e940": {
+      "vsize": 285,
+      "weight": 1140,
+      "time": 1786319774,
+      "height": 962740,
+      "descendantcount": 1,
+      "descendantsize": 285,
+      "ancestorcount": 1,
+      "ancestorsize": 285,
+      "wtxid": "4b90f3ce4b90f3ce4b90f3ce4b90f3ce4b90f3ce4b90f3ce4b90f3ce4b90f3ce",
+      "fees": {
+        "base": 0.00000855,
+        "modified": 0.00000855,
+        "ancestor": 0.00000855,
+        "descendant": 0.00000855
+      },
+      "depends": [],
+      "spentby": [],
+      "bip125-replaceable": false,
+      "unbroadcast": false
+    },
+    "c2a4176bc2a4176bc2a4176bc2a4176bc2a4176bc2a4176bc2a4176bc2a4176b": {
+      "vsize": 1052,
+      "weight": 4205,
+      "time": 1786320043,
+      "height": 962741,
+      "descendantcount": 1,
+      "descendantsize": 1052,
+      "ancestorcount": 1,
+      "ancestorsize": 1052,
+      "wtxid": "d36c8a12d36c8a12d36c8a12d36c8a12d36c8a12d36c8a12d36c8a12d36c8a12",
+      "fees": {
+        "base": 0.00026300,
+        "modified": 0.00026300,
+        "ancestor": 0.00026300,
+        "descendant": 0.00026300
+      },
+      "depends": [],
+      "spentby": [],
+      "bip125-replaceable": false,
+      "unbroadcast": false
+    },
+    "05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f05e83d9f": {
+      "vsize": 208,
+      "weight": 832,
+      "time": 1786320056,
+      "height": 962741,
+      "descendantcount": 1,
+      "descendantsize": 208,
+      "ancestorcount": 2,
+      "ancestorsize": 349,
+      "wtxid": "9c27b0459c27b0459c27b0459c27b0459c27b0459c27b0459c27b0459c27b045",
+      "fees": {
+        "base": 0.00000416,
+        "modified": 0.00000416,
+        "ancestor": 0.00001826,
+        "descendant": 0.00000416
+      },
+      "depends": [
+        "3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a3f0b7c2a"
+      ],
+      "spentby": [],
+      "bip125-replaceable": true,
+      "unbroadcast": false
+    }
+  },
+  "error": null,
+  "id": "poolwatch"
+}
