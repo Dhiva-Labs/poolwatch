@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/poolwatch-core",
+    "crates/poolwatch-adapters",
+    "crates/poolwatch-tui",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Dhiva-Labs/poolwatch"
+authors = ["Dhiva-Labs"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

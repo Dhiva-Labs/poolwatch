@@ -1,0 +1,69 @@
+# poolwatch example configuration
+# Copy to poolwatch.toml (or pass --config <path>) and adjust.
+# Every option is shown; commented lines show the default or an optional key.
+
+[general]
+# Full pool fetch cadence (per chain), seconds.
+poll_interval_secs = 5
+# Cheap stats fetch cadence (per chain), seconds.
+stats_interval_secs = 2
+# Log file (TUI owns stdout, so logs never go there). "~" is expanded.
+log_file = "~/.local/state/poolwatch/poolwatch.log"
+# Size guard for full-pool RPC responses. If a daemon returns more than
+# this, poolwatch degrades that chain to stats-only mode with a warning.
+# max_pool_response_mb = 64
+
+# ---------------------------------------------------------------------------
+# One [[chain]] block per daemon. `family` selects the adapter:
+#   "cryptonote" — monerod, oxend, beldexd, wownerod, ...
+#   "bitcoind"   — bitcoind, litecoind, ...
+# Adding another fork of a supported family needs ONLY a new block here.
+# `id` must be unique; duplicate ids are a hard error.
+# ---------------------------------------------------------------------------
+
+[[chain]]
+id = "monero-main"
+display_name = "Monero"
+ticker = "XMR"
+family = "cryptonote"
+rpc_url = "http://127.0.0.1:18081"
+decimals = 12
+# Label used for fee rates in the UI (default: "au/B" for cryptonote).
+fee_rate_unit = "pN/B"
+# monerod --rpc-login (HTTP digest auth), "user:pass":
+# rpc_login = "user:pass"
+
+[[chain]]
+id = "oxen-main"
+display_name = "Oxen"
+ticker = "OXEN"
+family = "cryptonote"
+rpc_url = "http://127.0.0.1:22023"
+decimals = 9
+fee_rate_unit = "nO/B"
+# Highlights Oxen Blink instant txs (⚡) on the dashboard and tx table.
+instant_tx = "blink"
+
+[[chain]]
+id = "beldex-main"
+display_name = "Beldex"
+ticker = "BDX"
+family = "cryptonote"
+rpc_url = "http://127.0.0.1:19091"
+decimals = 9
+fee_rate_unit = "nB/B"
+# Highlights Beldex Flash instant txs (⚡).
+instant_tx = "flash"
+
+[[chain]]
+id = "bitcoin-main"
+display_name = "Bitcoin"
+ticker = "BTC"
+family = "bitcoind"
+rpc_url = "http://127.0.0.1:8332"
+decimals = 8
+fee_rate_unit = "sat/vB"
+# Auth: exactly one of cookie file OR user/pass.
+rpc_cookie_file = "~/.bitcoin/.cookie"
+# rpc_user = "user"
+# rpc_password = "pass"

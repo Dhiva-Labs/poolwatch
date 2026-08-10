@@ -1,0 +1,4 @@
+/target
+*.log
+# local runtime config (the committed example is poolwatch.example.toml)
+/poolwatch.toml
