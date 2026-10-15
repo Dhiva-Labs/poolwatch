@@ -55,7 +55,7 @@ archive has a matching `.sha256` file.
 | Windows x64 | `poolwatch-<version>-x86_64-windows-msvc.zip` | `poolwatch.exe` |
 | Windows arm64 | `poolwatch-<version>-aarch64-windows-msvc.zip` | `poolwatch.exe`, native ARM64 (Snapdragon X, Windows on ARM) |
 
-The arm64 and Windows archives are attached to every release after v0.1.0
+The arm64 and Windows archives are attached to every release from v0.2.0 on
 (v0.1.0 shipped the Linux x86_64 archive only).
 
 ```sh
