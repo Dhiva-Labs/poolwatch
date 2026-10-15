@@ -3,41 +3,160 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # Dry run: the archives are built, verified and uploaded as workflow
+  # artifacts, but nothing is published (the release job is tag-only).
+  pull_request:
+    paths: [".github/workflows/release.yml"]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  release:
-    name: build static binary + GitHub release
-    runs-on: ubuntu-latest
+  linux:
+    name: build ${{ matrix.arch }} static binary
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            file_arch: x86-64
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            file_arch: ARM aarch64
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain (rust-toolchain.toml)
-        run: rustup show
+        run: |
+          rustup show
+          rustup target add ${{ matrix.target }}
       - name: musl tools
         run: sudo apt-get update && sudo apt-get install -y musl-tools
       - uses: Swatinem/rust-cache@v2
         with:
-          key: musl-release
+          key: musl-release-${{ matrix.arch }}
       - name: build
-        run: cargo build --release --target x86_64-unknown-linux-musl
+        run: cargo build --release --target ${{ matrix.target }}
       - name: package
         run: |
-          BIN=target/x86_64-unknown-linux-musl/release/poolwatch
-          # ldd wording differs by binary flavor: "not a dynamic executable"
-          # (static) vs "statically linked" (static-pie).
-          ldd "$BIN" 2>&1 | grep -qE "statically linked|not a dynamic executable" || { echo "binary is not static"; exit 1; }
-          NAME=poolwatch-${GITHUB_REF_NAME}-x86_64-linux-musl
-          mkdir "$NAME"
+          set -euo pipefail
+          test "$(uname -m)" = "${{ matrix.arch }}"
+          BIN=target/${{ matrix.target }}/release/poolwatch
+          .github/scripts/verify-linux-binary.sh "$BIN" "${{ matrix.file_arch }}"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then VERSION=$GITHUB_REF_NAME; else VERSION="test-${GITHUB_SHA::7}"; fi
+          NAME=poolwatch-${VERSION}-${{ matrix.arch }}-linux-musl
+          mkdir dist "$NAME"
           cp "$BIN" LICENSE README.md poolwatch.example.toml "$NAME/"
-          tar czf "$NAME.tar.gz" "$NAME"
-          sha256sum "$NAME.tar.gz" > "$NAME.tar.gz.sha256"
+          tar czf "dist/$NAME.tar.gz" "$NAME"
+          (cd dist && sha256sum "$NAME.tar.gz" > "$NAME.tar.gz.sha256")
+          cat "dist/$NAME.tar.gz.sha256"
+          # Prove the archive that ships is the working binary, not just the build output.
+          mkdir unpacked
+          tar xzf "dist/$NAME.tar.gz" -C unpacked
+          .github/scripts/verify-linux-binary.sh "unpacked/$NAME/poolwatch" "${{ matrix.file_arch }}"
+          python3 .github/scripts/smoke.py "unpacked/$NAME/poolwatch"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  windows:
+    name: build ${{ matrix.arch }} Windows executable
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: pwsh
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: windows-latest
+            host: x86_64-pc-windows-msvc
+            pe_machine: '0x8664'
+          - arch: aarch64
+            runner: windows-11-arm
+            host: aarch64-pc-windows-msvc
+            pe_machine: '0xAA64'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rustup (native)
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
+            Invoke-WebRequest "https://static.rust-lang.org/rustup/dist/${{ matrix.host }}/rustup-init.exe" -OutFile "$env:RUNNER_TEMP\rustup-init.exe"
+            & "$env:RUNNER_TEMP\rustup-init.exe" -y --default-host ${{ matrix.host }} --default-toolchain none --profile minimal
+            Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.cargo\bin"
+            $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+          }
+          rustup --version
+          rustup set default-host ${{ matrix.host }}
+      - name: Install toolchain (rust-toolchain.toml)
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          rustup show
+          rustc -vV
+          if ((rustc -vV | Select-String '^host: (.+)$').Matches[0].Groups[1].Value -ne '${{ matrix.host }}') {
+            throw 'rustc host is not ${{ matrix.host }}'
+          }
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: windows-release-${{ matrix.arch }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: build
+        run: cargo build --release
+      - name: package
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          .github/scripts/assert-pe-machine.ps1 -Path target\release\poolwatch.exe -Machine ${{ matrix.pe_machine }}
+          if ($env:GITHUB_REF_TYPE -eq 'tag') { $version = $env:GITHUB_REF_NAME } else { $version = "test-$($env:GITHUB_SHA.Substring(0, 7))" }
+          $name = "poolwatch-$version-${{ matrix.arch }}-windows-msvc"
+          New-Item -ItemType Directory dist, $name | Out-Null
+          Copy-Item target\release\poolwatch.exe, LICENSE, README.md, poolwatch.example.toml $name
+          Compress-Archive -Path $name -DestinationPath "dist\$name.zip"
+          $hash = (Get-FileHash "dist\$name.zip" -Algorithm SHA256).Hash.ToLower()
+          [IO.File]::WriteAllText("$PWD\dist\$name.zip.sha256", "$hash  $name.zip`n")
+          Get-Content "dist\$name.zip.sha256"
+          # Prove the archive that ships is the working binary, not just the build output.
+          Expand-Archive "dist\$name.zip" -DestinationPath unpacked
+          .github/scripts/assert-pe-machine.ps1 -Path "unpacked\$name\poolwatch.exe" -Machine ${{ matrix.pe_machine }}
+          python .github/scripts/smoke.py "unpacked\$name\poolwatch.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    if: github.ref_type == 'tag'
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
       - name: release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          ls -l dist
           gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
             --title "poolwatch $GITHUB_REF_NAME" \
             --generate-notes \
-            poolwatch-*.tar.gz poolwatch-*.tar.gz.sha256
+            dist/*

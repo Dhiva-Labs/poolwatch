@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
@@ -24,28 +28,122 @@ jobs:
       - name: test
         run: cargo test --workspace
 
-  musl-build:
-    name: static musl build
-    runs-on: ubuntu-latest
+  # The workspace tests on the platforms that are not covered by lint-test.
+  # The Windows legs also build and smoke-test the release executable (see
+  # the windows job), so only Linux arm64 needs a separate test job.
+  test-linux-arm64:
+    name: test (Linux arm64)
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain (rust-toolchain.toml)
         run: rustup show
+      - uses: Swatinem/rust-cache@v2
+      - name: Assert the runner is arm64
+        run: |
+          uname -m
+          test "$(uname -m)" = aarch64
+          rustc -vV | grep -F 'host: aarch64-unknown-linux-gnu'
+      - name: test
+        run: cargo test --workspace
+
+  musl-build:
+    name: static musl build (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            file_arch: x86-64
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            file_arch: ARM aarch64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain (rust-toolchain.toml)
+        run: |
+          rustup show
+          rustup target add ${{ matrix.target }}
       - name: musl tools
         run: sudo apt-get update && sudo apt-get install -y musl-tools
       - uses: Swatinem/rust-cache@v2
         with:
-          key: musl
-      - name: build
-        run: cargo build --release --target x86_64-unknown-linux-musl
-      - name: verify static
+          key: musl-${{ matrix.arch }}
+      - name: Assert the runner is ${{ matrix.arch }}
         run: |
-          BIN=target/x86_64-unknown-linux-musl/release/poolwatch
-          file "$BIN"
-          # ldd wording differs by binary flavor: "not a dynamic executable"
-          # (static) vs "statically linked" (static-pie).
-          ldd "$BIN" 2>&1 | grep -qE "statically linked|not a dynamic executable" || { echo "binary is not static"; exit 1; }
+          uname -m
+          test "$(uname -m)" = "${{ matrix.arch }}"
+      - name: build
+        run: cargo build --release --target ${{ matrix.target }}
+      - name: verify architecture and static linking
+        run: .github/scripts/verify-linux-binary.sh target/${{ matrix.target }}/release/poolwatch "${{ matrix.file_arch }}"
+      - name: smoke test the binary against a mock node
+        run: python3 .github/scripts/smoke.py target/${{ matrix.target }}/release/poolwatch
       - uses: actions/upload-artifact@v4
         with:
-          name: poolwatch-x86_64-linux-musl
-          path: target/x86_64-unknown-linux-musl/release/poolwatch
+          name: poolwatch-${{ matrix.arch }}-linux-musl
+          path: target/${{ matrix.target }}/release/poolwatch
+
+  windows:
+    name: windows (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: pwsh
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: windows-latest
+            host: x86_64-pc-windows-msvc
+            pe_machine: '0x8664'
+          - arch: aarch64
+            runner: windows-11-arm
+            host: aarch64-pc-windows-msvc
+            pe_machine: '0xAA64'
+    steps:
+      - uses: actions/checkout@v4
+      # The Windows arm64 image may carry no rustup, and an x64 rustup would
+      # default to the x64 toolchain running under emulation.
+      - name: Install rustup (native)
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
+            Invoke-WebRequest "https://static.rust-lang.org/rustup/dist/${{ matrix.host }}/rustup-init.exe" -OutFile "$env:RUNNER_TEMP\rustup-init.exe"
+            & "$env:RUNNER_TEMP\rustup-init.exe" -y --default-host ${{ matrix.host }} --default-toolchain none --profile minimal
+            Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.cargo\bin"
+            $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+          }
+          rustup --version
+          rustup set default-host ${{ matrix.host }}
+      - name: Install toolchain (rust-toolchain.toml)
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          rustup show
+          rustc -vV
+          if ((rustc -vV | Select-String '^host: (.+)$').Matches[0].Groups[1].Value -ne '${{ matrix.host }}') {
+            throw 'rustc host is not ${{ matrix.host }}'
+          }
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: windows-${{ matrix.arch }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: test
+        run: cargo test --workspace
+      - name: build
+        run: cargo build --release
+      - name: verify architecture
+        run: .github/scripts/assert-pe-machine.ps1 -Path target\release\poolwatch.exe -Machine ${{ matrix.pe_machine }}
+      - name: smoke test the binary against a mock node
+        run: python .github/scripts/smoke.py target\release\poolwatch.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: poolwatch-${{ matrix.arch }}-windows-msvc
+          path: target/release/poolwatch.exe

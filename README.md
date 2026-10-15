@@ -1,5 +1,10 @@
 # poolwatch
 
+[![ARM64 builds](https://github.com/Dhiva-Labs/poolwatch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dhiva-Labs/poolwatch/actions/workflows/ci.yml)
+![Linux x64 | arm64](https://img.shields.io/badge/Linux-x64%20%7C%20arm64-informational?logo=linux&logoColor=white)
+![Windows x64 | arm64](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-informational?logo=windows&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+
 **htop for your mempool.**
 
 A single static binary that watches the mempools of your own blockchain
@@ -32,22 +37,55 @@ for node operators, miners, and privacy-conscious users on headless boxes.
 - **First-seen tracking** — poolwatch timestamps every tx on first
   appearance and derives pool residency time and inflow rate (tx/min over
   1m/5m/15m), which daemons don't expose.
-- **Zero runtime dependencies** — static musl build; `scp` it to a bare
-  server and run.
+- **Zero runtime dependencies** — static musl build for x86_64 and arm64
+  Linux; `scp` it to a bare server and run.
 
 ## Install
 
 ### Release binary (recommended)
 
-Grab the static `poolwatch` binary from the
-[latest release](https://github.com/Dhiva-Labs/poolwatch/releases), then:
+Download the archive for your platform from the
+[latest release](https://github.com/Dhiva-Labs/poolwatch/releases). Every
+archive has a matching `.sha256` file.
+
+| Platform | Archive | Notes |
+|---|---|---|
+| Linux x86_64 | `poolwatch-<version>-x86_64-linux-musl.tar.gz` | static musl, no libraries needed |
+| Linux arm64 (aarch64) | `poolwatch-<version>-aarch64-linux-musl.tar.gz` | static musl, no libraries needed (Raspberry Pi 4/5, Ampere, Graviton, ...) |
+| Windows x64 | `poolwatch-<version>-x86_64-windows-msvc.zip` | `poolwatch.exe` |
+| Windows arm64 | `poolwatch-<version>-aarch64-windows-msvc.zip` | `poolwatch.exe`, native ARM64 (Snapdragon X, Windows on ARM) |
+
+The arm64 and Windows archives are attached to every release after v0.1.0
+(v0.1.0 shipped the Linux x86_64 archive only).
 
 ```sh
-chmod +x poolwatch
+tar xzf poolwatch-<version>-<arch>-linux-musl.tar.gz
+cd poolwatch-<version>-<arch>-linux-musl
 ./poolwatch --config poolwatch.toml
 ```
 
-It runs on any x86_64 Linux — no libraries needed.
+Verify a download with `sha256sum -c poolwatch-<version>-<arch>-linux-musl.tar.gz.sha256`
+(Linux) or `Get-FileHash <archive> -Algorithm SHA256` (Windows).
+
+#### Windows notes
+
+Run poolwatch in Windows Terminal (or any console with VT support):
+
+```powershell
+.\poolwatch.exe --config poolwatch.toml
+```
+
+- `~` in the config expands to your user profile (`%USERPROFILE%`), so the
+  example config's `log_file` lands in `C:\Users\<you>\.local\state\poolwatch\`.
+  Change it if you prefer another place.
+- bitcoind keeps its auth cookie in `%APPDATA%\Bitcoin\.cookie`, not in
+  `~/.bitcoin`. Give the full path with a TOML *literal* string (single
+  quotes, no escaping): `rpc_cookie_file = 'C:\Users\you\AppData\Roaming\Bitcoin\.cookie'`,
+  or use `rpc_user` / `rpc_password`.
+- CI builds both Windows targets natively (x64 and ARM64 runners), runs the
+  full test suite on them, and runs `--once` against a mock node. The
+  interactive TUI uses crossterm's Windows console backend, but it is not
+  driven interactively in CI.
 
 ### From source
 
@@ -57,7 +95,8 @@ cd poolwatch
 cargo install --path crates/poolwatch-tui
 ```
 
-For the fully static binary:
+For the fully static binary (use `aarch64-unknown-linux-musl` on arm64;
+needs `musl-tools` and `rustup target add <target>`):
 
 ```sh
 cargo build --release --target x86_64-unknown-linux-musl
