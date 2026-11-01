@@ -3,6 +3,7 @@
 [![ARM64 builds](https://github.com/Dhiva-Labs/poolwatch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dhiva-Labs/poolwatch/actions/workflows/ci.yml)
 ![Linux x64 | arm64](https://img.shields.io/badge/Linux-x64%20%7C%20arm64-informational?logo=linux&logoColor=white)
 ![Windows x64 | arm64](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-informational?logo=windows&logoColor=white)
+![Linux: tar.gz | rpm | Arch](https://img.shields.io/badge/Linux-tar.gz%20%7C%20rpm%20%7C%20Arch-informational?logo=linux&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 **htop for your mempool.**
@@ -66,6 +67,30 @@ cd poolwatch-<version>-<arch>-linux-musl
 
 Verify a download with `sha256sum -c poolwatch-<version>-<arch>-linux-musl.tar.gz.sha256`
 (Linux) or `Get-FileHash <archive> -Algorithm SHA256` (Windows).
+
+### Fedora, RHEL, openSUSE and Arch packages
+
+The same static binary is also packaged for rpm- and pacman-based
+distributions, for x86_64 and aarch64. It installs `/usr/bin/poolwatch`,
+with the example config in `/usr/share/doc/poolwatch/`. These files are
+attached to releases from the next release on; every one has a matching
+`.sha256` file.
+
+| Distribution | File | Install |
+|---|---|---|
+| Fedora, RHEL/Rocky/Alma | `poolwatch-<version>-1.<x86_64\|aarch64>.rpm` | `sudo dnf install ./poolwatch-<version>-1.x86_64.rpm` |
+| openSUSE | the same `.rpm` | `sudo zypper install --allow-unsigned-rpm ./poolwatch-<version>-1.x86_64.rpm` |
+| Arch, Manjaro, EndeavourOS | `poolwatch-<version>-1-<x86_64\|aarch64>.pkg.tar.zst` | `sudo pacman -U ./poolwatch-<version>-1-x86_64.pkg.tar.zst` |
+| AUR | `poolwatch-bin-<version>-aur.tar.gz` (PKGBUILD + .SRCINFO) | `poolwatch-bin` on the AUR once published; until then unpack it and run `makepkg -si` |
+
+`<version>` here has no leading `v` (`0.2.0`). The binary is static, so the
+packages have no library dependencies. The `.rpm` is not signed (hence
+`--allow-unsigned-rpm`) and uses zstd compression (rpm 4.14 or newer). CI
+installs the `.rpm` on current Fedora and openSUSE Tumbleweed and the Arch
+package on Arch Linux, and runs the end-to-end smoke test against each
+installed copy, on x86_64 and aarch64. Arch Linux has no official arm64
+image, so the aarch64 Arch package gets a static check of its metadata and
+binary instead.
 
 #### Windows notes
 

@@ -1,0 +1,30 @@
+# Maintainer: Dhiva Labs <dhivakar1010@gmail.com>
+#
+# AUR package. It installs the static musl binary from the GitHub release
+# archive, so Arch users run the same build as every other distribution.
+# packaging/arch/aur.sh renders this file for each release (version and
+# checksums) and checks it with makepkg; the rendered PKGBUILD and .SRCINFO
+# are what gets pushed to the AUR.
+pkgname=@NAME@-bin
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc='@SUMMARY@'
+arch=('x86_64' 'aarch64')
+url='@HOMEPAGE@'
+license=('@LICENSE@')
+# A static musl binary: no runtime dependencies.
+provides=('@NAME@')
+conflicts=('@NAME@')
+options=('!strip' '!debug')
+source_x86_64=("@RELEASE_URL@/@TARBALL_X86_64@")
+source_aarch64=("@RELEASE_URL@/@TARBALL_AARCH64@")
+sha256sums_x86_64=('@SHA_X86_64@')
+sha256sums_aarch64=('@SHA_AARCH64@')
+
+package() {
+  # The archive holds one directory, @NAME@-<tag>-<arch>-linux-musl/.
+  cd "$srcdir"/@NAME@-*-"$CARCH"-linux-musl
+  install -Dm755 @NAME@ "$pkgdir/usr/bin/@NAME@"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md @NAME@.example.toml -t "$pkgdir/usr/share/doc/@NAME@/"
+}
