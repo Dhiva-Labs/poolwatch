@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added: packages for more Linux distributions, built from the static musl
+  binary: `.rpm` for Fedora, RHEL and openSUSE, `.pkg.tar.zst` for Arch Linux,
+  and an AUR `poolwatch-bin` PKGBUILD, for x86_64 and aarch64. CI installs each
+  one on its distribution and runs the smoke test there.
+
 ## 0.2.0 - 2026-10-16
 
 - Added: Windows support. `poolwatch-<version>-x86_64-windows-msvc.zip` and

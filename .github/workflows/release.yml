@@ -3,10 +3,11 @@ name: Release
 on:
   push:
     tags: ["v*"]
-  # Dry run: the archives are built, verified and uploaded as workflow
-  # artifacts, but nothing is published (the release job is tag-only).
+  # Dry run: the archives and packages are built, verified and uploaded as
+  # workflow artifacts, but nothing is published (the release job is
+  # tag-only).
   pull_request:
-    paths: [".github/workflows/release.yml"]
+    paths: [".github/workflows/release.yml", "packaging/**"]
   workflow_dispatch:
 
 permissions:
@@ -137,10 +138,101 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  # Repackages each architecture's static binary for Fedora/RHEL/openSUSE
+  # (.rpm) and Arch (.pkg.tar.zst), straight from the archive that ships, then
+  # installs both on the real distribution and runs the smoke test there. A
+  # terminal program gets no AppImage or Flatpak: the archive already is one
+  # self-contained binary.
+  distros:
+    name: rpm + Arch package ${{ matrix.arch }}
+    needs: [linux]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64, deb_arch: amd64, nfpm_arch: x86_64, runner: ubuntu-latest }
+          - { arch: aarch64, deb_arch: arm64, nfpm_arch: arm64, runner: ubuntu-24.04-arm }
+    env:
+      NFPM_VERSION: '2.48.0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-linux-${{ matrix.arch }}
+          path: archive
+      - name: Install nfpm
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bin"
+          cd "$RUNNER_TEMP/bin"
+          tarball="nfpm_${NFPM_VERSION}_Linux_${{ matrix.nfpm_arch }}.tar.gz"
+          gh release download "v$NFPM_VERSION" -R goreleaser/nfpm -p "$tarball" -p checksums.txt
+          grep " $tarball\$" checksums.txt | sha256sum -c -
+          tar -xzf "$tarball" nfpm
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Build .rpm and Arch package
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match the Cargo.toml version $VERSION"
+            exit 1
+          fi
+          # The installed tree, built from the release archive itself.
+          tar -xzf archive/*.tar.gz -C "$RUNNER_TEMP"
+          src="$(echo "$RUNNER_TEMP"/poolwatch-*-linux-musl)"
+          root="$RUNNER_TEMP/root"
+          install -Dm755 "$src/poolwatch" "$root/usr/bin/poolwatch"
+          install -Dm644 "$src/README.md" "$src/poolwatch.example.toml" -t "$root/usr/share/doc/poolwatch/"
+          VERSION="$VERSION" packaging/linux-distros/pack.sh "$root" ${{ matrix.deb_arch }} dist
+          cd dist
+          for f in *.rpm *.pkg.tar.zst; do sha256sum "$f" > "$f.sha256"; done
+          cat ./*.sha256
+      - name: Install and run on Fedora, openSUSE and Arch
+        run: packaging/linux-distros/verify.sh dist ${{ matrix.deb_arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-distros-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  # AUR recipe: PKGBUILD + .SRCINFO for poolwatch-bin, rendered with this
+  # build's checksums and proven with makepkg on archlinux:latest.
+  aur:
+    name: AUR PKGBUILD
+    needs: [linux]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-linux-*
+          merge-multiple: true
+          path: archives
+      - name: Render and check the PKGBUILD
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          VERSION="$VERSION" packaging/arch/aur.sh \
+            archives/*-x86_64-linux-musl.tar.gz archives/*-aarch64-linux-musl.tar.gz dist
+          cd dist
+          for f in *-aur.tar.gz; do sha256sum "$f" > "$f.sha256"; done
+          cat ./*.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-aur
+          path: dist/*
+          if-no-files-found: error
+
   release:
     name: GitHub release
     if: github.ref_type == 'tag'
-    needs: [linux, windows]
+    needs: [linux, windows, distros, aur]
     runs-on: ubuntu-latest
     permissions:
       contents: write
