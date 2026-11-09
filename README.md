@@ -8,6 +8,8 @@
 
 **htop for your mempool.**
 
+**Documentation:** step-by-step guides at [learn.dhivalabs.com](https://learn.dhivalabs.com/apps/poolwatch/): [install](https://learn.dhivalabs.com/apps/poolwatch/install) · [beginner guide](https://learn.dhivalabs.com/apps/poolwatch/getting-started) · [troubleshooting](https://learn.dhivalabs.com/apps/poolwatch/faq). New to the topic? Try the [Crypto wallets](https://learn.dhivalabs.com/tracks/crypto/) learning track.
+
 A single static binary that watches the mempools of your own blockchain
 daemons — Monero, Oxen, Beldex, Bitcoin, and any compatible fork — side by
 side, in the terminal, over their native RPC. No external APIs, no database,
